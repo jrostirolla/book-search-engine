@@ -13,6 +13,7 @@ module.exports = {
     // ["Bearer", "<tokenvalue>"]
     if (req.headers.authorization) {
       token = token.split(' ').pop().trim();
+      console.log('token accepted!')
     }
 
     if (!token) {
@@ -24,6 +25,7 @@ module.exports = {
     try {
       const { data } = jwt.verify(token, secret, { maxAge: expiration });
       req.user = data;
+      console.log('Token accepted: Welcome back')
     } catch {
       console.log('Invalid token');
       // return res.status(400).json({ message: 'invalid token!' });
