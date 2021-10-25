@@ -6,14 +6,15 @@ const resolvers = {
     Query: {
         me: async (parent, arg, context) => {
             if (context.user) {
-            return User.findOne({ _id: context.user._id }).populate('books');
+            return User.findOne({ _id: context.user._id });
         }
         throw new AuthenticationError('No user login detected: please log in...');
         },
-        books: async (parent, { username }) => {
-            const params = username ? { username } : {};
-            return Book.find(params).sort({ createdAt: -1 });
-        },
+        // books: async (parent, { username }) => {
+        //     const params = username ? { username } : {};
+        //     return Book.find(params).sort({ createdAt: -1 });
+        // },
+    },
 
     Mutation: {
         login : async (parent, { email, password }) => {
@@ -63,6 +64,6 @@ const resolvers = {
             }
         }
     }
-}};
+};
 
 module.exports = resolvers;
