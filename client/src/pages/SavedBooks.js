@@ -19,8 +19,6 @@ const SavedBooks = () => {
     variables: { username: userData.username }
   });
 
-console.log(...userData)
-
   if (loading) {
     console.log('data loading...')
   };
