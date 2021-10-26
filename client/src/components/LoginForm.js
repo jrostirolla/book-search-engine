@@ -2,7 +2,10 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 
-import { loginUser } from '../utils/API';
+import { useMutation } from '@apollo/client';
+import { LOGIN_USER } from '../utils/mutations';
+
+// import { loginUser } from '../utils/API';
 import Auth from '../utils/auth';
 
 const LoginForm = () => {
@@ -15,7 +18,17 @@ const LoginForm = () => {
     setUserFormData({ ...userFormData, [name]: value });
   };
 
-  const handleFormSubmit = async (event) => {
+    const [loginUser, {loading, data, error }] = useMutation(LOGIN_USER);
+
+    if (loading) {
+      console.log('data loading...')
+    };
+
+    if (error) {
+      console.log(error)
+    };
+    
+  const HandleFormSubmit = async (event) => {
     event.preventDefault();
 
     // check if form has everything (as per react-bootstrap docs)
@@ -25,14 +38,20 @@ const LoginForm = () => {
       event.stopPropagation();
     }
 
+
+
     try {
-      const response = await loginUser(userFormData);
+      // const response = await loginUser(userFormData);
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
+      const {data} = await loginUser({
+        variables: { ...userFormData }
+      })
 
-      const { token, user } = await response.json();
+      // if (!response.ok) {
+      //   throw new Error('something went wrong!');
+      // }
+
+      const { token, user } = await data;
       console.log(user);
       Auth.login(token);
     } catch (err) {
@@ -49,7 +68,7 @@ const LoginForm = () => {
 
   return (
     <>
-      <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
+      <Form noValidate validated={validated} onSubmit={HandleFormSubmit}>
         <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
           Something went wrong with your login credentials!
         </Alert>

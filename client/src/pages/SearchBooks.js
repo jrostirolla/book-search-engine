@@ -72,7 +72,15 @@ const SearchBooks = () => {
       const { loading, data, error } = useMutation(SAVE_BOOK, {
         variables: {bookId: bookId},
       })
-      
+    
+      if (loading) {
+        console.log('request loading...')
+      }
+
+      if (error) {
+        console.log('error')
+      }
+
     if (!token) {
       return false;
     }
