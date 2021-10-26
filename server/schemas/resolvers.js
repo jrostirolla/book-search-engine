@@ -6,7 +6,7 @@ const resolvers = {
     Query: {
         me: async (parent, arg, context) => {
             if (context.user) {
-            return User.findOne({ _id: context.user._id });
+            return User.findOne({ username: context.user.username });
         }
         throw new AuthenticationError('No user login detected: please log in...');
         },

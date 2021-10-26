@@ -15,11 +15,22 @@ const SavedBooks = () => {
   // use this to determine if `useEffect()` hook needs to run again
   const userDataLength = Object.keys(userData).length;
 
-  useQuery(() => {
-    const GetUserData = async () => {
-      // try {
+  const { loading, data, error } = useQuery(GET_ME, {
+    variables: { username: userData.username }
+  });
 
-        const [userData, { loading, data, error }] = useQuery(GET_ME);
+console.log(...userData)
+
+  if (loading) {
+    console.log('data loading...')
+  };
+
+  if (error) {
+    console.log(error)
+  };
+
+  useEffect((userData) => {
+    const GetUserData = async () => {
 
         const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -35,10 +46,7 @@ const SavedBooks = () => {
 
         const user = await response.json();
         setUserData(user);
-      // } catch (err) {
-      //   console.error(err);
-      // }
-    };
+      }
 
     GetUserData();
   }, [userDataLength]);

@@ -27,7 +27,7 @@ const LoginForm = () => {
     if (error) {
       console.log(error)
     };
-    
+
   const HandleFormSubmit = async (event) => {
     event.preventDefault();
 
@@ -43,7 +43,7 @@ const LoginForm = () => {
     try {
       // const response = await loginUser(userFormData);
 
-      const {data} = await loginUser({
+      const { data } = await loginUser({
         variables: { ...userFormData }
       })
 
