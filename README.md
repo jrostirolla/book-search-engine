@@ -1,3 +1,3 @@
 # book-search-engine
 
-https://book-search-engine-jr.herokuapp.com/saved
+https://book-search-engine-jr.herokuapp.com
