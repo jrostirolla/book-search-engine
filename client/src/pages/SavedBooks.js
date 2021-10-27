@@ -16,7 +16,7 @@ const SavedBooks = () => {
   const userDataLength = Object.keys(userData).length;
 
   const { loading, data, error } = useQuery(GET_ME, {
-    variables: { username: userData.username }
+    variables: { _id: userData._id }
   });
 
 // console.log(userData)

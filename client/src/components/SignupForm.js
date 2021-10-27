@@ -1,128 +1,127 @@
-import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 
-import { useMutation } from '@apollo/client';
-import { ADD_USER } from '../utils/mutations';
+import { useMutation, useQuery } from '@apollo/client';
+import { GET_ME } from '../utils/queries';
+import { REMOVE_BOOK } from '../utils/mutations';
 
-//import { createUser } from '../utils/API';
+import { getMe, deleteBook } from '../utils/API';
 import Auth from '../utils/auth';
+import { removeBookId } from '../utils/localStorage';
 
-const SignupForm = () => {
-  // set initial form state
-  const [userFormData, setUserFormData] = useState({ username: '', email: '', password: '' });
-  // set state for form validation
-  const [validated] = useState(false);
-  // set state for alert
-  const [showAlert, setShowAlert] = useState(false);
+const SavedBooks = () => {
+  // const [userData, setUserData] = useState({});
 
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setUserFormData({ ...userFormData, [name]: value });
-  };
+  // use this to determine if `useEffect()` hook needs to run again
+  // const userDataLength = Object.keys(userData).length;
+  const all = useQuery(GET_ME)
+  console.log(all)
+  const { loading, data } = useQuery(GET_ME)
+  console.log(loading)
+  console.log(data)
+  const userData = data?.me || {}
+  const [removeBook, { error }] = useMutation(REMOVE_BOOK)
+  // console.log(userData)
 
-    const [addUser, { loading, data, error }] = useMutation(ADD_USER);
-  
-    if (loading) {
-      console.log('data loading...')
-    }
+  // if (loading) {
+  //   console.log('data loading...')
+  // };
 
-    if (error) {
-      console.log(error)
-    }
+  // if (error) {
+  //   console.log(error)
+  // };
 
-  const HandleFormSubmit = async (event) => {
-    event.preventDefault();
+  // useEffect((userData) => {
+  //   const GetUserData = async () => {
 
-    // check if form has everything (as per react-bootstrap docs)
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
+  //       const token = Auth.loggedIn() ? Auth.getToken() : null;
 
-    try {
+  //       if (!token) {
+  //         return false;
+  //       }
 
-      console.log({ ...userFormData })
+  //       const response = await getMe(token);
 
-      const { data } = await addUser({
-        variables: { ...userFormData }
-      });
+  //       // if (!response.ok) {
+  //       //   throw new Error('something went wrong!');
+  //       // }
 
-      // if (!response.ok) {
-      //   throw new Error('something went wrong!');
-      // }
+  //       const user = await response.json();
+  //       setUserData(user);
+  //     }
 
-      const { token, user } = data;
-      console.log(user);
-      Auth.login(token);
-    } catch (err) {
-      console.error(err);
-      setShowAlert(true);
-    }
+  //   GetUserData();
+  // }, [userDataLength]);
 
-    setUserFormData({
-      username: '',
-      email: '',
-      password: '',
+  // create function that accepts the book's mongo _id value as param and deletes the book from the database
+
+
+
+  const HandleDeleteBook = async (bookId) => {
+    const token = Auth.loggedIn() ? Auth.getToken() : null;
+
+    const { loading, data, error } = useMutation(REMOVE_BOOK, {
+      variables: { bookId: bookId }
     });
+
+    if (!token) {
+      return false;
+    }
+
+    // try {
+
+
+    // if (!response.ok) {
+    //   throw new Error('something went wrong!');
+    // }
+
+    // const updatedUser = data;
+    // setUserData(updatedUser);
+    // upon success, remove book's id from localStorage
+    removeBookId(bookId);
+    // } catch (err) {
+    //   console.error(err);
+    // }
   };
+
+  // if data isn't here yet, say so
+  if (loading) {
+    return <h2>LOADING...</h2>;
+  }
 
   return (
     <>
-      {/* This is needed for the validation functionality above */}
-      <Form noValidate validated={validated} onSubmit={HandleFormSubmit}>
-        {/* show alert if server response is bad */}
-        <Alert dismissible onClose={() => setShowAlert(false)} show={showAlert} variant='danger'>
-          Something went wrong with your signup!
-        </Alert>
-
-        <Form.Group>
-          <Form.Label htmlFor='username'>Username</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Your username'
-            name='username'
-            onChange={handleInputChange}
-            value={userFormData.username}
-            required
-          />
-          <Form.Control.Feedback type='invalid'>Username is required!</Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label htmlFor='email'>Email</Form.Label>
-          <Form.Control
-            type='email'
-            placeholder='Your email address'
-            name='email'
-            onChange={handleInputChange}
-            value={userFormData.email}
-            required
-          />
-          <Form.Control.Feedback type='invalid'>Email is required!</Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group>
-          <Form.Label htmlFor='password'>Password</Form.Label>
-          <Form.Control
-            type='password'
-            placeholder='Your password'
-            name='password'
-            onChange={handleInputChange}
-            value={userFormData.password}
-            required
-          />
-          <Form.Control.Feedback type='invalid'>Password is required!</Form.Control.Feedback>
-        </Form.Group>
-        <Button
-          disabled={!(userFormData.username && userFormData.email && userFormData.password)}
-          type='submit'
-          variant='success'>
-          Submit
-        </Button>
-      </Form>
+      <Jumbotron fluid className='text-light bg-dark'>
+        <Container>
+          <h1>Viewing saved books!</h1>
+        </Container>
+      </Jumbotron>
+      <Container>
+        <h2>
+          {userData.savedBooks.length
+            ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
+            : 'You have no saved books!'}
+        </h2>
+        <CardColumns>
+          {userData.savedBooks.map((book) => {
+            return (
+              <Card key={book.bookId} border='dark'>
+                {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
+                <Card.Body>
+                  <Card.Title>{book.title}</Card.Title>
+                  <p className='small'>Authors: {book.authors}</p>
+                  <Card.Text>{book.description}</Card.Text>
+                  <Button className='btn-block btn-danger' onClick={() => HandleDeleteBook(book.bookId)}>
+                    Delete this Book!
+                  </Button>
+                </Card.Body>
+              </Card>
+            );
+          })}
+        </CardColumns>
+      </Container>
     </>
   );
 };
 
-export default SignupForm;
+export default SavedBooks;
